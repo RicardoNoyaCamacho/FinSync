@@ -1,0 +1,418 @@
+<div class="min-h-screen bg-slate-900">
+
+  <nav class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-4">
+      <a routerLink="/" class="text-slate-400 hover:text-white transition-colors flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Volver al Dashboard
+      </a>
+    </div>
+    <h1 class="text-xl font-bold text-white">Detalles de Tarjeta</h1>
+  </nav>
+
+  @if (currentCard(); as card) {
+  <div
+    class="bg-gradient-to-r from-blue-900 to-slate-900 rounded-2xl p-6 sm:p-8 mb-8 border border-blue-800/50 shadow-2xl relative overflow-hidden">
+    <div
+      class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
+    </div>
+
+    <div class="relative z-10 flex flex-col md:flex-row justify-between md:items-end gap-6">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <span
+            class="bg-blue-500/20 text-blue-300 text-xs font-bold px-3 py-1 rounded-full border border-blue-500/30 uppercase tracking-wider">
+            {{ card.alias }}
+          </span>
+
+          <button (click)="openEditModal()"
+            class="text-slate-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
+            title="Editar Tarjeta">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+              </path>
+            </svg>
+          </button>
+
+          <span class="text-slate-400 text-sm font-mono">**** {{ card.last4Digits }}</span>
+        </div>
+        <p class="text-slate-400 text-sm uppercase tracking-widest mb-1">Saldo Utilizado</p>
+        <h2 class="text-4xl sm:text-5xl font-bold text-white tracking-tight">
+          {{ card.currentBalance | currency }}
+        </h2>
+      </div>
+
+      <div class="md:text-right">
+        <p class="text-slate-400 text-sm mb-1">Crédito Disponible</p>
+        <p class="text-2xl font-semibold text-emerald-400">
+          {{ (card.creditLimit - card.currentBalance) | currency }}
+        </p>
+        <p class="text-xs text-slate-500 mt-1">Límite Total: {{ card.creditLimit | currency }}</p>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <div class="flex justify-between text-xs text-slate-400 mb-2">
+        <span>Uso de Crédito</span>
+        <span>{{ (card.currentBalance / card.creditLimit) | percent:'1.0-1' }}</span>
+      </div>
+      <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+        <div class="h-full rounded-full transition-all duration-1000 ease-out"
+          [style.width.%]="(card.currentBalance / card.creditLimit) * 100" [ngClass]="{
+              'bg-emerald-500': (card.currentBalance / card.creditLimit) < 0.5,
+              'bg-yellow-500': (card.currentBalance / card.creditLimit) >= 0.5 && (card.currentBalance / card.creditLimit) < 0.8,
+              'bg-red-500': (card.currentBalance / card.creditLimit) >= 0.8
+            }">
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <main class="max-w-4xl mx-auto px-6 py-8">
+
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h2 class="text-3xl font-bold text-white">Actividad</h2>
+        <p class="text-slate-400 mt-1">Gestiona tus movimientos y planes</p>
+      </div>
+      <button (click)="openModal()"
+        class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg font-medium transition-all shadow-lg flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Registrar Movimiento
+      </button>
+    </div>
+
+    <div class="flex border-b border-slate-700 mb-6">
+      <button (click)="switchTab('MOVIMIENTOS')" class="px-6 py-3 text-sm font-medium transition-colors border-b-2"
+        [class.border-blue-500]="activeTab() === 'MOVIMIENTOS'" [class.text-blue-400]="activeTab() === 'MOVIMIENTOS'"
+        [class.border-transparent]="activeTab() !== 'MOVIMIENTOS'"
+        [class.text-slate-400]="activeTab() !== 'MOVIMIENTOS'">
+        Movimientos
+      </button>
+      <button (click)="switchTab('MSI')" class="px-6 py-3 text-sm font-medium transition-colors border-b-2"
+        [class.border-purple-500]="activeTab() === 'MSI'" [class.text-purple-400]="activeTab() === 'MSI'"
+        [class.border-transparent]="activeTab() !== 'MSI'" [class.text-slate-400]="activeTab() !== 'MSI'">
+        Mis Mensualidades ({{ transactionService.installments().length }})
+      </button>
+      <button (click)="switchTab('STATS')"
+        class="px-6 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap"
+        [class.border-emerald-500]="activeTab() === 'STATS'" [class.text-emerald-400]="activeTab() === 'STATS'"
+        [class.border-transparent]="activeTab() !== 'STATS'" [class.text-slate-400]="activeTab() !== 'STATS'">
+        Estadísticas 📊
+      </button>
+    </div>
+
+    @if (activeTab() === 'MOVIMIENTOS') {
+    <div class="bg-slate-800 rounded-2xl shadow-xl border border-slate-700 overflow-hidden animate-fade-in">
+
+      @if (transactionService.isLoading()) {
+      <div class="p-6 space-y-4">
+        <div class="h-12 bg-slate-700 rounded animate-pulse"></div>
+        <div class="h-12 bg-slate-700 rounded animate-pulse"></div>
+        <div class="h-12 bg-slate-700 rounded animate-pulse"></div>
+      </div>
+      } @else {
+
+      <div class="divide-y divide-slate-700/50">
+        @for (tx of transactionService.transactions(); track tx.transactionId) {
+
+        <div class="p-4 sm:px-6 flex items-center justify-between hover:bg-slate-700/30 transition-colors">
+
+          <div class="flex items-center gap-4">
+            <div class="p-3 rounded-full"
+              [ngClass]="tx.type === 'EXPENSE' ? 'bg-red-500/10 text-red-400' : 'bg-emerald-500/10 text-emerald-400'">
+              @if (tx.type === 'EXPENSE') {
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+              </svg>
+              } @else {
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                </path>
+              </svg>
+              }
+            </div>
+
+            <div>
+              <p class="text-white font-medium">{{ tx.description }}</p>
+              <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
+                <span class="bg-slate-700 px-2 py-0.5 rounded">{{ tx.category }}</span>
+                <span>•</span>
+                <span>{{ tx.transactionDate | date:'short' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-right">
+            <p class="font-bold text-lg" [ngClass]="tx.type === 'EXPENSE' ? 'text-red-400' : 'text-emerald-400'">
+              {{ tx.type === 'EXPENSE' ? '-' : '+' }} {{ tx.amount | currency }}
+            </p>
+            <p class="text-xs text-slate-500 uppercase tracking-wider">{{ tx.status }}</p>
+          </div>
+
+        </div>
+
+        } @empty {
+        <div class="p-12 text-center">
+          <div class="text-6xl mb-4">🛒</div>
+          <h3 class="text-xl font-medium text-white mb-2">Sin movimientos</h3>
+          <p class="text-slate-400">Aún no hay compras o pagos registrados en esta tarjeta.</p>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+
+    @if (activeTab() === 'MSI') {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
+
+      @for (plan of transactionService.installments(); track plan.planId) {
+      <div
+        class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg relative overflow-hidden group hover:border-purple-500/50 transition-colors">
+
+        <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl -mr-8 -mt-8"></div>
+
+        <div class="flex justify-between items-start mb-4 relative z-10">
+          <div>
+            <h3 class="text-white font-bold text-lg truncate pr-2">{{ plan.description }}</h3>
+            <p class="text-slate-400 text-xs mt-1">Comprado: {{ plan.originalPurchaseDate | date }}</p>
+          </div>
+          <span
+            class="bg-purple-500/20 text-purple-300 text-xs font-bold px-2 py-1 rounded border border-purple-500/30 whitespace-nowrap">
+            {{ plan.totalInstallments }} MSI
+          </span>
+        </div>
+
+        <div class="flex justify-between items-end mb-2">
+          <div>
+            <p class="text-slate-400 text-xs">Progreso</p>
+            <p class="text-white font-mono">
+              <span class="text-purple-400 font-bold">{{ plan.paidInstallments }}</span>
+              / {{ plan.totalInstallments }} Pagados
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="text-slate-400 text-xs">Total</p>
+            <p class="text-white font-medium">{{ plan.totalAmount | currency }}</p>
+          </div>
+        </div>
+
+        <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-slate-700/50">
+          <div class="bg-gradient-to-r from-purple-600 to-indigo-500 h-full rounded-full transition-all duration-1000"
+            [style.width.%]="(plan.paidInstallments / plan.totalInstallments) * 100">
+          </div>
+        </div>
+
+        <p class="text-right text-xs text-slate-500 mt-3">
+          Faltan {{ plan.totalInstallments - plan.paidInstallments }} meses
+        </p>
+
+      </div>
+      } @empty {
+      <div class="col-span-full p-12 text-center border border-slate-700 border-dashed rounded-xl">
+        <div class="text-5xl mb-4">🎉</div>
+        <h3 class="text-xl font-medium text-white mb-2">¡Eres libre!</h3>
+        <p class="text-slate-400">No tienes compras a meses sin intereses activas.</p>
+      </div>
+      }
+    </div>
+    }
+
+    @if (activeTab() === 'STATS') {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
+
+      <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl">
+        <h3 class="text-white font-bold text-lg mb-6 flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+          </svg>
+          Distribución de Gastos
+        </h3>
+
+        <app-expense-chart [transactions]="transactionService.transactions()"
+          [cutoffDay]="currentCard()?.cutoffDay || 1"> </app-expense-chart>
+      </div>
+
+      <div
+        class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl flex flex-col justify-center items-center text-center">
+        <div class="p-4 bg-slate-700/50 rounded-full mb-4">
+          <span class="text-4xl">💡</span>
+        </div>
+        <h3 class="text-white font-bold text-xl mb-2">Tip Financiero</h3>
+        <p class="text-slate-400">
+          Analizar tus gastos por categoría te ayuda a identificar fugas de dinero.
+          ¡Intenta mantener tus gastos de "Ocio" por debajo del 20%!
+        </p>
+      </div>
+
+    </div>
+    }
+  </main>
+
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" [class.hidden]="!isModalOpen()">
+
+    <div class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-600 w-full max-w-md overflow-hidden">
+
+      <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center">
+        <h3 class="text-xl font-bold text-white">Registrar Movimiento</h3>
+        <button (click)="closeModal()" class="text-slate-400 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <form [formGroup]="transactionForm" (ngSubmit)="onSubmitTransaction()" class="p-6 space-y-4">
+
+        <div class="grid grid-cols-3 gap-2 p-1 bg-slate-900 rounded-lg">
+          <button type="button" (click)="setTransactionType('EXPENSE')"
+            [class.bg-red-600]="transactionForm.get('type')?.value === 'EXPENSE'"
+            [class.text-white]="transactionForm.get('type')?.value === 'EXPENSE'"
+            class="py-2 text-xs sm:text-sm font-medium rounded-md text-slate-400 transition-all hover:text-white">
+            Gasto 🛒
+          </button>
+
+          <button type="button" (click)="setTransactionType('PAYMENT')"
+            [class.bg-emerald-600]="transactionForm.get('type')?.value === 'PAYMENT'"
+            [class.text-white]="transactionForm.get('type')?.value === 'PAYMENT'"
+            class="py-2 text-xs sm:text-sm font-medium rounded-md text-slate-400 transition-all hover:text-white">
+            Abono 💳
+          </button>
+
+          <button type="button" (click)="setTransactionType('INSTALLMENT')"
+            [class.bg-purple-600]="transactionForm.get('type')?.value === 'INSTALLMENT'"
+            [class.text-white]="transactionForm.get('type')?.value === 'INSTALLMENT'"
+            class="py-2 text-xs sm:text-sm font-medium rounded-md text-slate-400 transition-all hover:text-white">
+            Plan MSI 🗓️
+          </button>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1">
+            {{ transactionForm.get('type')?.value === 'INSTALLMENT' ? 'Monto Total de la Deuda' : 'Monto' }} ($)
+          </label>
+          <input type="number" formControlName="amount"
+            class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white text-lg font-bold focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1">Descripción</label>
+          <input type="text" formControlName="description" placeholder="Ej. Laptop, Vuelos..."
+            class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        @if (transactionForm.get('type')?.value !== 'INSTALLMENT') {
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1">Categoría</label>
+          <input type="text" formControlName="category" placeholder="Ej. Comida"
+            class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        }
+
+        @if (transactionForm.get('type')?.value === 'INSTALLMENT') {
+        <div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl space-y-3 animate-fade-in">
+          <h4 class="text-purple-300 text-sm font-bold flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Configuración de Meses
+          </h4>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Plazo (Meses)</label>
+              <input type="number" formControlName="totalInstallments" placeholder="Ej. 12"
+                class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Pagados</label>
+              <input type="number" formControlName="paidInstallments" placeholder="Ej. 1"
+                class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Fecha de Compra Original</label>
+            <input type="date" formControlName="originalDate"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+          </div>
+        </div>
+        }
+
+        <div class="mt-6 flex gap-3 pt-4 border-t border-slate-700">
+          <button type="button" (click)="closeModal()"
+            class="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="transactionForm.invalid || isSubmitting()"
+            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors disabled:opacity-50 flex justify-center items-center">
+            @if (isSubmitting()) { Guardando... } @else { Registrar }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" [class.hidden]="!isEditModalOpen()">
+
+  <div
+    class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-600 w-full max-w-md overflow-hidden animate-fade-in">
+
+    <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center">
+      <h3 class="text-xl font-bold text-white">Editar Tarjeta</h3>
+      <button (click)="closeEditModal()" class="text-slate-400 hover:text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="editCardForm" (ngSubmit)="onUpdateCard()" class="p-6 space-y-4">
+
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1">Alias</label>
+        <input type="text" formControlName="alias"
+          class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1">Límite de Crédito</label>
+          <input type="number" formControlName="creditLimit"
+            class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1">Día de Corte</label>
+          <input type="number" formControlName="cutoffDay" min="1" max="31"
+            class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+      </div>
+
+      <div class="mt-6 flex gap-3 pt-4 border-t border-slate-700">
+        <button type="button" (click)="closeEditModal()"
+          class="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">
+          Cancelar
+        </button>
+        <button type="submit" [disabled]="editCardForm.invalid || isUpdatingCard()"
+          class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors disabled:opacity-50">
+          @if (isUpdatingCard()) { Guardando... } @else { Actualizar }
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
