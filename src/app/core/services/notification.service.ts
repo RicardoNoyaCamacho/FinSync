@@ -63,10 +63,6 @@ export class NotificationService implements OnDestroy {
     });
   }
 
-  getDuePayments(cardId: string) {
-    return this.http.get<Notification[]>(`${this.apiUrl}/notifications/${cardId}/due-payments`);
-  }
-
   ngOnDestroy() {
     this.stopPolling();
   }
