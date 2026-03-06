@@ -106,6 +106,12 @@
         [class.border-transparent]="activeTab() !== 'STATS'" [class.text-slate-400]="activeTab() !== 'STATS'">
         Estadísticas 📊
       </button>
+      <button (click)="switchTab('PAGOS')"
+        class="px-6 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap"
+        [class.border-orange-500]="activeTab() === 'PAGOS'" [class.text-orange-400]="activeTab() === 'PAGOS'"
+        [class.border-transparent]="activeTab() !== 'PAGOS'" [class.text-slate-400]="activeTab() !== 'PAGOS'">
+        Pagos 💳
+      </button>
     </div>
 
     @if (activeTab() === 'MOVIMIENTOS') {
@@ -257,6 +263,69 @@
         </p>
       </div>
 
+    </div>
+    }
+
+    @if (activeTab() === 'PAGOS') {
+    <div class="animate-fade-in">
+      @if (statementService.isLoading()) {
+      <div class="space-y-3">
+        @for (i of [1,2,3]; track i) {
+        <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 animate-pulse flex gap-4">
+          <div class="flex-1 space-y-2">
+            <div class="h-4 bg-slate-700 rounded w-1/4"></div>
+            <div class="h-3 bg-slate-700 rounded w-1/2"></div>
+          </div>
+          <div class="h-8 w-24 bg-slate-700 rounded"></div>
+        </div>
+        }
+      </div>
+      } @else if (statementService.statements().length === 0) {
+      <div class="flex flex-col items-center justify-center py-16 text-center">
+        <div class="text-5xl mb-4">✅</div>
+        <h3 class="text-xl font-medium text-white mb-2">Sin pagos pendientes</h3>
+        <p class="text-slate-400">No tienes estados de cuenta próximos a vencer.</p>
+      </div>
+      } @else {
+      <div class="space-y-3">
+        @for (statement of statementService.statements(); track statement.statementId) {
+        <div class="bg-slate-800 rounded-xl p-5 border border-slate-700 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <p class="text-white font-semibold">Vence: {{ statement.dueDate | date:'dd/MM/yyyy' }}</p>
+              @if (statementService.urgencyClass(statement) === 'green') {
+              <span class="text-xs px-2 py-0.5 rounded-full bg-green-900/40 text-green-400 border border-green-800/50">
+                🟢 {{ statementService.daysUntilDue(statement) }} días
+              </span>
+              } @else if (statementService.urgencyClass(statement) === 'yellow') {
+              <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-900/40 text-yellow-400 border border-yellow-800/50">
+                🟡 {{ statementService.daysUntilDue(statement) }} días
+              </span>
+              } @else {
+              <span class="text-xs px-2 py-0.5 rounded-full bg-red-900/40 text-red-400 border border-red-800/50">
+                🔴 {{ statementService.daysUntilDue(statement) }} días
+              </span>
+              }
+            </div>
+            <p class="text-slate-400 text-sm">Monto total: <span class="text-white font-medium">{{ statement.totalAmount | currency }}</span></p>
+            <p class="text-slate-400 text-sm">Pago mínimo: <span class="text-yellow-400 font-medium">{{ statement.minimumPayment | currency }}</span></p>
+          </div>
+          @if (!statement.isPaid) {
+          <button
+            (click)="onMarkAsPaid(statement.statementId)"
+            class="flex-shrink-0 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            Marcar como Pagado
+          </button>
+          } @else {
+          <span class="flex-shrink-0 px-4 py-2 bg-slate-700 text-slate-400 text-sm rounded-lg">
+            ✅ Pagado
+          </span>
+          }
+        </div>
+        }
+      </div>
+      }
     </div>
     }
   </main>

@@ -4,10 +4,11 @@ import { Auth } from '../../core/services/auth';
 import { Card } from '../../core/services/card';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { NotificationCenterComponent } from '../../shared/components/notification-center/notification-center.component';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, NotificationCenterComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
