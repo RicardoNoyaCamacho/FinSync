@@ -1,0 +1,122 @@
+<div class="relative">
+  <!-- Bell button with badge -->
+  <button
+    (click)="togglePanel()"
+    class="relative p-2 text-slate-300 hover:text-white transition-colors rounded-lg hover:bg-slate-700"
+    aria-label="Notificaciones"
+    [attr.aria-expanded]="isOpen()"
+  >
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+      </path>
+    </svg>
+
+    @if (notificationService.unreadCount() > 0) {
+    <span
+      class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
+      aria-label="{{ notificationService.unreadCount() }} notificaciones sin leer"
+    >
+      {{ notificationService.unreadCount() > 99 ? '99+' : notificationService.unreadCount() }}
+    </span>
+    }
+  </button>
+
+  <!-- Dropdown panel -->
+  @if (isOpen()) {
+  <div
+    class="absolute right-0 mt-2 w-80 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden notification-panel"
+    role="dialog"
+    aria-label="Panel de notificaciones"
+  >
+    <!-- Header -->
+    <div class="px-4 py-3 border-b border-slate-700 flex justify-between items-center">
+      <h3 class="text-sm font-semibold text-white">Notificaciones</h3>
+      @if (notificationService.unreadCount() > 0) {
+      <span class="bg-red-500/20 text-red-400 text-xs px-2 py-0.5 rounded-full">
+        {{ notificationService.unreadCount() }} sin leer
+      </span>
+      }
+    </div>
+
+    <!-- Loading skeleton -->
+    @if (notificationService.isLoading()) {
+    <div class="p-4 space-y-3">
+      @for (i of [1,2,3]; track i) {
+      <div class="animate-pulse flex gap-3">
+        <div class="w-8 h-8 bg-slate-700 rounded-full flex-shrink-0"></div>
+        <div class="flex-1 space-y-1.5">
+          <div class="h-3 bg-slate-700 rounded w-3/4"></div>
+          <div class="h-2 bg-slate-700 rounded w-full"></div>
+        </div>
+      </div>
+      }
+    </div>
+    } @else if (previewNotifications.length === 0) {
+    <div class="py-8 text-center">
+      <p class="text-slate-400 text-sm">Sin notificaciones</p>
+    </div>
+    } @else {
+    <ul class="divide-y divide-slate-700/50 max-h-72 overflow-y-auto">
+      @for (notification of previewNotifications; track notification.notificationId) {
+      <li
+        (click)="onNotificationClick(notification.notificationId)"
+        class="flex items-start gap-3 px-4 py-3 hover:bg-slate-700/50 cursor-pointer transition-colors"
+        [class.bg-blue-900/20]="!notification.isRead"
+        role="button"
+        [attr.aria-label]="notification.title"
+      >
+        <!-- Type icon -->
+        <span class="mt-0.5 flex-shrink-0 text-base" aria-hidden="true">
+          @if (notification.type === 'PAYMENT_DUE') { 🔴 }
+          @else if (notification.type === 'PAYMENT_REMINDER') { 🟡 }
+          @else { 🔔 }
+        </span>
+
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-white truncate" [class.font-bold]="!notification.isRead">
+            {{ notification.title }}
+          </p>
+          <p class="text-xs text-slate-400 mt-0.5 line-clamp-2">{{ notification.message }}</p>
+          <p class="text-xs text-slate-500 mt-1">{{ notification.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+        <!-- Unread dot -->
+        @if (!notification.isRead) {
+        <span class="w-2 h-2 bg-blue-400 rounded-full flex-shrink-0 mt-1.5" aria-hidden="true"></span>
+        }
+
+        <!-- Delete button -->
+        <button
+          (click)="onDelete($event, notification.notificationId)"
+          class="flex-shrink-0 text-slate-500 hover:text-red-400 transition-colors p-1 rounded"
+          aria-label="Eliminar notificación"
+          title="Eliminar"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </li>
+      }
+    </ul>
+    }
+
+    <!-- Footer -->
+    <div class="px-4 py-3 border-t border-slate-700">
+      <a
+        routerLink="/notifications"
+        (click)="closePanel()"
+        class="block text-center text-sm text-blue-400 hover:text-blue-300 transition-colors font-medium"
+      >
+        Ver todas las notificaciones →
+      </a>
+    </div>
+  </div>
+  }
+
+  <!-- Backdrop to close panel -->
+  @if (isOpen()) {
+  <div class="fixed inset-0 z-40" (click)="closePanel()"></div>
+  }
+</div>

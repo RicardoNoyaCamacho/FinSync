@@ -7,6 +7,7 @@ import { Card } from '../../core/services/card';
 import { CreditCard } from '../../core/models/card.model';
 import { InstallmentRequest } from '../../core/models/transactions.model';
 import { ExpenseChartComponent } from './components/expense-chart/expense-chart';
+import { StatementService } from '../../core/services/statement.service';
 
 @Component({
   selector: 'app-card-detail',
@@ -21,6 +22,7 @@ export class CardDetail implements OnInit {
 
   transactionService = inject(Transaction);
   cardService = inject(Card);
+  statementService = inject(StatementService);
 
   cardId: string = '';
   currentCard = signal<CreditCard | null>(null);
@@ -31,7 +33,7 @@ export class CardDetail implements OnInit {
   isEditModalOpen = signal(false);
   isUpdatingCard = signal(false);
 
-  activeTab = signal<'MOVIMIENTOS' | 'MSI' | 'STATS'>('MOVIMIENTOS');
+  activeTab = signal<'MOVIMIENTOS' | 'MSI' | 'STATS' | 'PAGOS'>('MOVIMIENTOS');
 
   editCardForm = this.fb.nonNullable.group({
     alias: ['', Validators.required],
@@ -60,6 +62,7 @@ export class CardDetail implements OnInit {
     // Cargamos TODO: Tarjeta, Transacciones y AHORA TAMBIÉN los Planes
     this.transactionService.loadTransactions(this.cardId);
     this.transactionService.loadInstallments(this.cardId); // <--- NUEVO
+    this.statementService.loadStatements(this.cardId);
 
     this.cardService.getCardById(this.cardId).subscribe({
       next: (card) => this.currentCard.set(card),
@@ -144,7 +147,7 @@ export class CardDetail implements OnInit {
     this.isSubmitting.set(false);
   }
 
-  switchTab(tab: 'MOVIMIENTOS' | 'MSI' | 'STATS') {
+  switchTab(tab: 'MOVIMIENTOS' | 'MSI' | 'STATS' | 'PAGOS') {
     this.activeTab.set(tab);
   }
 
@@ -181,6 +184,13 @@ export class CardDetail implements OnInit {
         console.error('Error actualizando tarjeta', err);
         this.isUpdatingCard.set(false);
       }
+    });
+  }
+
+  onMarkAsPaid(statementId: string) {
+    this.statementService.markAsPayment(statementId).subscribe({
+      next: () => this.statementService.loadStatements(this.cardId),
+      error: (err) => console.error('Error al marcar como pagado:', err),
     });
   }
 }

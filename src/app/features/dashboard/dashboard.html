@@ -4,10 +4,13 @@
       FinSync
     </h1>
 
-    <button (click)="onLogout()"
+    <div class="flex items-center gap-3">
+      <app-notification-center></app-notification-center>
+      <button (click)="onLogout()"
       class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-all">
       Cerrar Sesión
     </button>
+    </div>
   </nav>
 
   <main class="max-w-7xl mx-auto px-6 py-8">
