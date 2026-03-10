@@ -5,6 +5,7 @@ export interface CreditCard {
   currentBalance: number;
   creditLimit: number;
   cutoffDay: number;
+  daysToPay: number;
 }
 
 export interface CreditCardRequest {

@@ -500,6 +500,21 @@
         </div>
       </div>
 
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1">Días para Pagar</label>
+        <div class="flex items-center gap-3">
+          <input type="number" formControlName="daysToPay" min="10" max="40" inputmode="numeric"
+            class="flex-1 px-4 py-2.5 sm:py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 outline-none text-base sm:text-sm">
+          <span class="text-slate-400 text-xs whitespace-nowrap">días</span>
+        </div>
+        <p class="text-slate-500 text-[10px] sm:text-xs mt-1">
+          Tu fecha de pago será el día de corte + estos días (10-40).
+        </p>
+        @if (editCardForm.controls.daysToPay.touched && editCardForm.controls.daysToPay.invalid) {
+        <p class="text-red-400 text-xs mt-1">Entre 10 y 40 días.</p>
+        }
+      </div>
+
       <div class="flex gap-3 pt-4 border-t border-slate-700">
         <button type="button" (click)="closeEditModal()"
           class="flex-1 px-4 py-2.5 sm:py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">

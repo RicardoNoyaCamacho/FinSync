@@ -38,7 +38,8 @@ export class CardDetail implements OnInit {
   editCardForm = this.fb.nonNullable.group({
     alias: ['', Validators.required],
     cutoffDay: [1, [Validators.required, Validators.min(1), Validators.max(31)]],
-    creditLimit: [0, [Validators.required, Validators.min(1)]]
+    creditLimit: [0, [Validators.required, Validators.min(1)]],
+    daysToPay: [20, [Validators.required, Validators.min(10), Validators.max(40)]]
   });
 
   transactionForm = this.fb.nonNullable.group({
@@ -157,7 +158,8 @@ export class CardDetail implements OnInit {
       this.editCardForm.patchValue({
         alias: card.alias,
         cutoffDay: card.cutoffDay,
-        creditLimit: card.creditLimit
+        creditLimit: card.creditLimit,
+        daysToPay: card.daysToPay
       });
       this.isEditModalOpen.set(true);
     }
