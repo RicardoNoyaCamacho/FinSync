@@ -15,7 +15,7 @@ export class StatementService {
 
   loadStatements(cardId: string) {
     this.isLoading.set(true);
-    this.http.get<Statement[]>(`${this.apiUrl}/notifications/${cardId}/due-payments`).subscribe({
+    this.http.get<Statement[]>(`${this.apiUrl}/statements/${cardId}`).subscribe({
       next: (data) => {
         this.statements.set(data);
         this.isLoading.set(false);

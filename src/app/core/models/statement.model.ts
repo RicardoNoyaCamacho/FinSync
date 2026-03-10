@@ -1,9 +1,11 @@
 export interface Statement {
   statementId: string;
   cardId: string;
+  periodStartDate: string;
+  periodEndDate: string;
   dueDate: string;
-  totalAmount: number;
-  minimumPayment: number;
+  totalBalance: number;      // era totalAmount
+  minPayment: number;        // era minimumPayment
+  bonifiablePayment: number;
   isPaid: boolean;
-  createdAt: string;
 }
