@@ -18,6 +18,35 @@
     </div>
   </nav>
 
+  <!-- Email verification banner -->
+  @if (showEmailBanner()) {
+  <div class="mx-4 sm:mx-6 lg:mx-auto lg:max-w-7xl mt-4">
+    <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div class="flex items-start gap-3">
+        <span class="text-2xl">📧</span>
+        <div>
+          <p class="text-blue-300 font-medium text-sm">Verifica tu correo electrónico</p>
+          <p class="text-slate-400 text-xs mt-0.5">Revisa tu bandeja de entrada para activar los recordatorios de pago por email.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        @if (resendSuccess()) {
+          <span class="text-emerald-400 text-xs">✅ Email reenviado</span>
+        } @else {
+          <button (click)="onResendVerification()" [disabled]="isResending()"
+            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap">
+            @if (isResending()) { Enviando... } @else { Reenviar email }
+          </button>
+        }
+        <button (click)="dismissEmailBanner()"
+          class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded-lg transition-colors whitespace-nowrap">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
   <!-- MAIN: Padding progresivo -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
     <!-- Header con wrap en mobile -->

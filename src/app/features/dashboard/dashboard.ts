@@ -22,6 +22,9 @@ export class Dashboard implements OnInit {
 
   isModalOpen = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
+  showEmailBanner = signal<boolean>(!localStorage.getItem('email_banner_dismissed'));
+  isResending = signal<boolean>(false);
+  resendSuccess = signal<boolean>(false);
 
   cardForm = this.fb.nonNullable.group({
     alias: ['', [Validators.required]],
@@ -36,6 +39,28 @@ export class Dashboard implements OnInit {
 
   onLogout() {
     this.authService.logout();
+  }
+
+  dismissEmailBanner() {
+    this.showEmailBanner.set(false);
+    localStorage.setItem('email_banner_dismissed', 'true');
+  }
+
+  onResendVerification() {
+    this.isResending.set(true);
+    this.authService.resendVerification().subscribe({
+      next: () => {
+        this.isResending.set(false);
+        this.resendSuccess.set(true);
+      },
+      error: (err) => {
+        this.isResending.set(false);
+        const errorMessage: string = err?.error ?? '';
+        if (err?.status === 400 || errorMessage.toLowerCase().includes('ya está verificado')) {
+          this.dismissEmailBanner();
+        }
+      }
+    });
   }
 
   openModal() {
