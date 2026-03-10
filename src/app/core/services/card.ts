@@ -41,7 +41,7 @@ export class Card {
     return this.http.get<CreditCard>(`${this.apiUrl}/cards/${cardId}`);
   }
 
-  updateCard(cardId: string, data: { alias: string; cutoffDay: number; creditLimit: number }) {
+  updateCard(cardId: string, data: { alias: string; cutoffDay: number; creditLimit: number; daysToPay: number }) {
     return this.http.patch<CreditCard>(`${this.apiUrl}/cards/${cardId}`, data);
   }
 }
