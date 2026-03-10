@@ -6,6 +6,20 @@
       <p class="text-slate-400">Inicia sesión para gestionar tus finanzas</p>
     </div>
 
+    @if (showVerifiedBanner()) {
+    <div class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-lg mb-4 text-sm">
+      <p class="font-medium">✅ ¡Email verificado exitosamente!</p>
+      <p class="mt-0.5 text-emerald-400/80">Ya puedes recibir recordatorios de pago por correo electrónico.</p>
+    </div>
+    }
+
+    @if (showRegisteredBanner()) {
+    <div class="bg-blue-500/10 border border-blue-500/30 text-blue-400 px-4 py-3 rounded-lg mb-4 text-sm">
+      <p class="font-medium">📧 ¡Registro exitoso!</p>
+      <p class="mt-0.5 text-blue-400/80">Te enviamos un email de verificación. Revisa tu bandeja de entrada para activar los recordatorios por correo.</p>
+    </div>
+    }
+
     @if (errorMessage()) {
     <div class="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-6 text-sm">
       {{ errorMessage() }}

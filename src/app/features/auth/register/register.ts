@@ -35,8 +35,8 @@ export class Register {
 
     this.authService.register(this.registerForm.getRawValue()).subscribe({
       next: () => {
-        // Registro exitoso -> Redirigir al Login
-        this.router.navigate(['/login']);
+        // Registro exitoso -> Redirigir al Login con flag
+        this.router.navigate(['/login'], { queryParams: { registered: true } });
       },
       error: (err) => {
         console.error(err);
