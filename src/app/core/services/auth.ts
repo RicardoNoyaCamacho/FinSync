@@ -55,7 +55,7 @@ export class Auth {
   }
 
   resendVerification() {
-    return this.http.post(`${this.apiUrl}/auth/resend-verification`, {}, { responseType: 'text' });
+    return this.http.post(`${this.apiUrl}/email/resend-verification`, {}, { responseType: 'text' });
   }
 
 }
